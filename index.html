@@ -108,17 +108,19 @@
       position: absolute;
       font-size: 2rem;
       color: var(--accent-300);
+      will-change: transform;
+      z-index: 0;
       animation: floatUp 3s ease-out forwards;
       opacity: 0;
     }
 
     @keyframes floatUp {
       0% {
-        transform: translateY(0) scale(1);
-        opacity: 1;
+        transform: translateY(0) translateX(0) scale(1);
+        opacity: 0.9;
       }
       100% {
-        transform: translateY(-200px) scale(1.5);
+        transform: translateY(-260px) translateX(var(--dx, 0px)) scale(1.4);
         opacity: 0;
       }
     }
@@ -243,7 +245,11 @@
 
     function initFlow() {
       if (!heartTimer) {
-        heartTimer = setInterval(createHeart, 900);
+        heartTimer = setInterval(() => {
+          // spawn 1–3 hearts per tick for a dense backdrop
+          let n = 1 + (Math.random() < 0.5 ? 1 : 0) + (Math.random() < 0.1 ? 1 : 0);
+          for (let i = 0; i < n; i++) createHeart();
+        }, 45);
       }
       const yesBtn = document.querySelector('.yes');
       const noBtn = document.querySelector('.no');
@@ -267,7 +273,6 @@
 
       // show the current prompt with a subtle type effect
       revealWords('question', questions[step], 22, 520);
-      microBurst();
     }
 
     function handleAnswer(value, targetEl = null) {
@@ -296,12 +301,16 @@
       const pool = ['🩵','💗','💖'];
       const pick = Math.random();
       heart.textContent = pick < 0.6 ? '🩵' : (pick < 0.9 ? '💗' : '💖');
+      // position near the bottom with slight variation
       heart.style.left = Math.random() * window.innerWidth + 'px';
-      // randomize size & duration a bit
-      const size = 1.6 + Math.random() * 1.2; // 1.6rem–2.8rem visual scale
+      heart.style.top = (window.innerHeight - 40 - Math.random() * 80) + 'px';
+      // randomize size, duration, and sideways drift
+      const size = 1.4 + Math.random() * 1.6; // 1.4rem–3.0rem
       heart.style.fontSize = size + 'rem';
-      const dur = 2200 + Math.random() * 1400; // 2.2s–3.6s
+      const dur = 2200 + Math.random() * 1800; // 2.2s–4.0s
       heart.style.animationDuration = dur + 'ms';
+      const dx = (Math.random() * 180 - 90) + 'px';
+      heart.style.setProperty('--dx', dx);
       document.body.appendChild(heart);
       setTimeout(() => heart.remove(), dur);
     }
