@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Will You Be My Girlfriend?</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&family=Great+Vibes&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.4.0/dist/confetti.browser.min.js"></script>
+  <style>
+    :root {
+      /* Light blue (🩵) inspired palette */
+      --bg1: #FCE4EC;  /* pink 50 */
+      --bg2: #F8BBD0;  /* pink 100 */
+      --panel-bg: rgba(255,255,255,0.78);
+      --panel-border: rgba(255,255,255,0.60);
+      --text: #0f172a; /* slate-900 for strong contrast */
+
+      --primary-500: #2196f3; /* blue 500 */
+      --primary-700: #1976d2; /* blue 700 */
+      --accent-300: #F48FB1;  /* pink 200 */
+
+      /* Romantic pink/red accents */
+      --rose-300: #f48fb1;  /* pink 300 */
+      --rose-400: #f06292;  /* pink 400 */
+      --rose-500: #ec407a;  /* pink 500 */
+      --rose-600: #d81b60;  /* pink 600 */
+      --red-400:  #ef5350;  /* red 400 */
+
+      --muted-500: #64748b;  /* slate 500 */
+      --muted-700: #475569;  /* slate 600 */
+    }
+    html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      height: auto;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(135deg, var(--bg1) 0%, var(--bg2) 100%);
+      font-family: 'Montserrat', 'Noto Sans SC', sans-serif;
+      overflow: hidden;
+      color: var(--text);
+    }
+
+    #container {
+      width: 90%;
+      max-width: 400px;
+      box-sizing: border-box;
+      text-align: center;
+      background: var(--panel-bg);
+      padding: 2rem 3rem;
+      border-radius: 15px;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+      position: relative;
+      z-index: 1;
+      backdrop-filter: blur(10px);
+      border: 2px solid var(--panel-border);
+    }
+
+    h1 {
+      font-family: 'Great Vibes', cursive;
+      font-size: 3.5rem;
+      margin-bottom: 0.5rem;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    p {
+      font-size: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .btn {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 600;
+      font-size: 1.25rem;
+      margin: 0 .5rem;
+      padding: .75rem 1.5rem;
+      border-radius: .5rem;
+      border: none;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s, background 0.3s;
+      box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+      background: linear-gradient(45deg, var(--muted-500), var(--muted-700));
+      color: white;
+    }
+    .btn.no {
+      background: linear-gradient(45deg, var(--muted-500), var(--muted-700));
+    }
+    .btn.yes {
+      background: linear-gradient(45deg, var(--rose-400), var(--rose-600));
+      box-shadow: 0 8px 16px rgba(236, 64, 122, 0.35);
+    }
+    .btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+    }
+
+    /* Heart animation */
+    .heart {
+      position: absolute;
+      font-size: 2rem;
+      color: var(--accent-300);
+      animation: floatUp 3s ease-out forwards;
+      opacity: 0;
+    }
+
+    @keyframes floatUp {
+      0% {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(-200px) scale(1.5);
+        opacity: 0;
+      }
+    }
+    /* Pulse animation for celebration */
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+    #container.pulse {
+      animation: pulse 2s infinite;
+    }
+    canvas#confetti {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+    /* Fast per-word reveal */
+    .word {
+      display: inline-block;
+      opacity: 0;
+      transform: translateY(6px) scale(0.98);
+      animation: popIn 0.28s ease-out forwards;
+    }
+    @keyframes popIn {
+      from { opacity: 0; transform: translateY(6px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    /* Respect reduced motion preferences */
+    @media (prefers-reduced-motion: reduce) {
+      .word { animation: none !important; opacity: 1; transform: none; }
+    }
+  </style>
+</head>
+<body>
+  <div id="container">
+    <h1>Hey, Shirley.</h1>
+    <p id="question"></p>
+    <button class="btn yes">Yes!</button>
+    <button class="btn no">No</button>
+  </div>
+  <canvas id="confetti"></canvas>
+  <script>
+    function typeWriter(id, text, baseDelay = 70) {
+      const element = document.getElementById(id);
+      let i = 0;
+      function tick() {
+        element.textContent += text.charAt(i);
+        i++;
+        if (i < text.length) {
+          const jitter = 0.8 + Math.random() * 0.4; // 0.8x–1.2x
+          setTimeout(tick, baseDelay * jitter);
+        }
+      }
+      tick();
+    }
+    function revealWords(id, text, baseStep = 24, maxTotal = 650) {
+      const el = document.getElementById(id);
+      el.innerHTML = '';
+      const words = text.split(' ').filter(w => w.length);
+      const step = Math.min(baseStep, Math.max(12, Math.floor(maxTotal / Math.max(words.length, 1))));
+      words.forEach((w, i) => {
+        const span = document.createElement('span');
+        span.className = 'word';
+        span.textContent = w;
+        span.style.animationDelay = (i * step) + 'ms';
+        el.appendChild(span);
+        if (i < words.length - 1) el.appendChild(document.createTextNode(' '));
+      });
+      // Allow click/tap to finish instantly
+      el.onclick = () => {
+        const spans = el.querySelectorAll('.word');
+        spans.forEach(s => {
+          s.style.animationDelay = '0ms';
+          s.style.animationDuration = '1ms';
+          s.style.opacity = '1';
+          s.style.transform = 'none';
+        });
+        el.onclick = null;
+      };
+    }
+    document.addEventListener('DOMContentLoaded', initFlow);
+
+    const container = document.getElementById('container');
+    let heartTimer = null;
+    const PREFERS_REDUCED_MOTION = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    function microBurst(colors = ['#ec407a', '#f48fb1', '#f06292', '#ffebee'], opts = {}) {
+      if (PREFERS_REDUCED_MOTION) return;
+      confetti(Object.assign({
+        particleCount: 22,
+        spread: 46,
+        ticks: 160,
+        scalar: 0.9,
+        origin: { y: 0.28 },
+        colors
+      }, opts));
+    }
+
+    function burstFromElement(el, colors) {
+      if (!el || PREFERS_REDUCED_MOTION) return;
+      const rect = el.getBoundingClientRect();
+      const ox = (rect.left + rect.width/2) / window.innerWidth;
+      const oy = (rect.top + rect.height/2) / window.innerHeight;
+      microBurst(colors, { origin: { x: ox, y: oy }, spread: 36, particleCount: 18, ticks: 130, scalar: 0.8 });
+    }
+
+    const questions = [
+      "Did you enjoy the walk?",
+      "I enjoyed our conversation. Was it enjoyable for you too?",
+      "Was the food to your liking?",
+      "Should we do another date after this?",
+      "I've really enjoyed being with you, will you be my girlfriend?"
+    ];
+
+    let step = 0;
+    const answers = [];
+
+    function initFlow() {
+      if (!heartTimer) {
+        heartTimer = setInterval(createHeart, 900);
+      }
+      const yesBtn = document.querySelector('.yes');
+      const noBtn = document.querySelector('.no');
+      yesBtn.onclick = (e) => handleAnswer(true, e.currentTarget);
+      noBtn.onclick = (e) => handleAnswer(false, e.currentTarget);
+      renderStep();
+    }
+
+    function renderStep() {
+      const isFinal = step === questions.length - 1;
+      const questionEl = document.getElementById('question');
+
+      // reset current text before typing the new one
+      questionEl.textContent = "";
+
+      // button labels
+      const yesBtn = document.querySelector('.yes');
+      const noBtn = document.querySelector('.no');
+      yesBtn.textContent = "Yes";
+      noBtn.textContent = isFinal ? "Not yet" : "No";
+
+      // show the current prompt with a subtle type effect
+      revealWords('question', questions[step], 22, 520);
+      microBurst();
+    }
+
+    function handleAnswer(value, targetEl = null) {
+      const isFinal = step === questions.length - 1;
+      if (value) {
+        burstFromElement(targetEl, ['#ec407a','#f48fb1','#ffebee']);
+      }
+      if (isFinal) {
+        if (value) {
+          onYes();
+        } else {
+          onNotYet();
+        }
+        return;
+      }
+
+      answers.push(value);
+      step += 1;
+      renderStep();
+    }
+
+    function createHeart() {
+      if (PREFERS_REDUCED_MOTION) return;
+      const heart = document.createElement('div');
+      heart.className = 'heart';
+      const pool = ['🩵','💗','💖'];
+      const pick = Math.random();
+      heart.textContent = pick < 0.6 ? '🩵' : (pick < 0.9 ? '💗' : '💖');
+      heart.style.left = Math.random() * window.innerWidth + 'px';
+      // randomize size & duration a bit
+      const size = 1.6 + Math.random() * 1.2; // 1.6rem–2.8rem visual scale
+      heart.style.fontSize = size + 'rem';
+      const dur = 2200 + Math.random() * 1400; // 2.2s–3.6s
+      heart.style.animationDuration = dur + 'ms';
+      document.body.appendChild(heart);
+      setTimeout(() => heart.remove(), dur);
+    }
+
+    function onYes() {
+      container.innerHTML = "<h1 aria-label=\"Yes\">🩵</h1><p>Shirley, I love you so, so much.</p>";
+      for (let i = 0; i < 30; i++) {
+        setTimeout(createHeart, i * 100);
+      }
+      // Launch confetti burst
+      confetti({
+        particleCount: 200,
+        spread: 100,
+        origin: { y: 0.6 },
+        colors: ['#ec407a', '#f48fb1', '#f06292', '#ffebee', '#ef5350']
+      });
+      // Add subtle pulse to container
+      container.classList.add('pulse');
+    }
+
+    function onNotYet() {
+      container.innerHTML = "<h1>All good</h1><p>No pressure. Thanks for being straight with me.</p>";
+    }
+
+    // Handlers are attached in initFlow()
+
+  </script>
+</body>
+</html>
