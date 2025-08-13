@@ -120,7 +120,7 @@
         opacity: 0.9;
       }
       100% {
-        transform: translateY(-260px) translateX(var(--dx, 0px)) scale(1.4);
+        transform: translateY(var(--dy, -320px)) translateX(var(--dx, 0px)) scale(1.4);
         opacity: 0;
       }
     }
@@ -301,16 +301,21 @@
       const pool = ['🩵','💗','💖'];
       const pick = Math.random();
       heart.textContent = pick < 0.6 ? '🩵' : (pick < 0.9 ? '💗' : '💖');
-      // position near the bottom with slight variation
-      heart.style.left = Math.random() * window.innerWidth + 'px';
-      heart.style.top = (window.innerHeight - 40 - Math.random() * 80) + 'px';
-      // randomize size, duration, and sideways drift
+
+      // spawn anywhere across the full viewport
+      heart.style.left = (Math.random() * window.innerWidth) + 'px';
+      heart.style.top  = (Math.random() * window.innerHeight) + 'px';
+
+      // randomize size, duration, sideways drift, and vertical travel
       const size = 1.4 + Math.random() * 1.6; // 1.4rem–3.0rem
       heart.style.fontSize = size + 'rem';
-      const dur = 2200 + Math.random() * 1800; // 2.2s–4.0s
+      const dur = 2200 + Math.random() * 2200; // 2.2s–4.4s
       heart.style.animationDuration = dur + 'ms';
-      const dx = (Math.random() * 180 - 90) + 'px';
+      const dx = (Math.random() * 220 - 110) + 'px';
       heart.style.setProperty('--dx', dx);
+      const dy = -(260 + Math.random() * 520); // rise 260–780px
+      heart.style.setProperty('--dy', dy + 'px');
+
       document.body.appendChild(heart);
       setTimeout(() => heart.remove(), dur);
     }
