@@ -90,6 +90,10 @@
       box-shadow: 0 6px 12px rgba(0,0,0,0.15);
       background: linear-gradient(45deg, var(--muted-500), var(--muted-700));
       color: white;
+      line-height: 1.1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
     }
     .btn.no {
       background: linear-gradient(45deg, var(--muted-500), var(--muted-700));
@@ -101,6 +105,28 @@
     .btn:hover {
       transform: scale(1.05);
       box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+    }
+
+    .actions {
+      display: flex;
+      gap: 0.75rem;
+      justify-content: center;
+      align-items: stretch;
+      margin-top: 0.25rem;
+      flex-wrap: nowrap;
+    }
+    .actions .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: .9rem 1.3rem;
+      white-space: nowrap;
+      flex: 0 0 auto;     /* natural width based on text */
+      min-width: 140px;   /* keep both buttons balanced */
+    }
+    @media (max-width: 380px) {
+      .actions { flex-wrap: wrap; }
+      .actions .btn { flex: 1 1 100%; }
     }
 
     /* Heart animation */
@@ -163,8 +189,10 @@
   <div id="container">
     <h1>Hey, Shirley.</h1>
     <p id="question"></p>
-    <button class="btn yes">Yes!</button>
-    <button class="btn no">No</button>
+    <div class="actions">
+      <button class="btn yes">Yes!</button>
+      <button class="btn no">No</button>
+    </div>
   </div>
   <canvas id="confetti"></canvas>
   <script>
@@ -268,8 +296,8 @@
       // button labels
       const yesBtn = document.querySelector('.yes');
       const noBtn = document.querySelector('.no');
-      yesBtn.textContent = "Yes";
-      noBtn.textContent = isFinal ? "Not yet" : "No";
+      yesBtn.textContent = "Yippie 🩵";
+      noBtn.textContent = isFinal ? "Aw, nooo 🐢" : "Aw, nooo 🐢";
 
       // show the current prompt with a subtle type effect
       revealWords('question', questions[step], 22, 520);
